@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiberSupply - Platform Penyelamat & Berbagi Makanan</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="h-full text-slate-800 flex flex-col antialiased bg-slate-50 selection:bg-brand-500 selection:text-white">
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4 sm:px-0"></div>
+
+    <!-- MAIN APP WRAPPER -->
+    <div id="app" class="min-h-screen flex flex-col">
+
+        <!-- NAVBAR -->
+        <header id="main-nav" class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-brand-100 hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 flex items-center gap-2.5 cursor-pointer" onclick="navigateTo('home')">
+                            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                                <i class="fa-solid fa-leaf text-xl"></i>
+                            </div>
+                            <span class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-brand-700 via-brand-600 to-emerald-500 bg-clip-text text-transparent">SiberSupply</span>
+                        </div>
+                        
+                        <!-- Desktop Links -->
+                        <nav id="nav-links-user" class="hidden md:ml-8 md:flex md:space-x-2">
+                            <button onclick="navigateTo('home')" id="nav-btn-home" class="nav-btn px-3 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-brand-600 hover:bg-brand-50">
+                                <i class="fa-solid fa-house mr-2"></i>Beranda
+                            </button>
+                            <button onclick="navigateTo('orders')" id="nav-btn-orders" class="nav-btn px-3 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-brand-600 hover:bg-brand-50">
+                                <i class="fa-solid fa-box-archive mr-2"></i>Pesanan Saya
+                            </button>
+                            <button onclick="navigateTo('profile')" id="nav-btn-profile" class="nav-btn px-3 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-brand-600 hover:bg-brand-50">
+                                <i class="fa-solid fa-user mr-2"></i>Profil
+                            </button>
+                        </nav>
+                        <nav id="nav-links-admin" class="hidden md:ml-8 md:flex md:space-x-2">
+                            <button onclick="navigateTo('admin')" id="nav-btn-admin" class="nav-btn px-3 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-brand-600 hover:bg-brand-50">
+                                <i class="fa-solid fa-gauge-high mr-2"></i>Dashboard Admin
+                            </button>
+                            <button onclick="navigateTo('profile')" id="nav-btn-admin-profile" class="nav-btn px-3 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-brand-600 hover:bg-brand-50">
+                                <i class="fa-solid fa-user mr-2"></i>Profil
+                            </button>
+                        </nav>
+                    </div>
+                    
+                    <div class="hidden md:flex items-center gap-3">
+                        <div class="flex items-center gap-2.5 bg-brand-50 border border-brand-100 px-3.5 py-1.5 rounded-full">
+                            <div class="w-7 h-7 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-xs" id="user-avatar-initial">
+                                U
+                            </div>
+                            <span class="text-xs font-bold text-brand-900 truncate max-w-[120px]" id="nav-user-name">User Name</span>
+                            <span class="text-[10px] bg-brand-200 text-brand-800 font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider" id="nav-user-role">USER</span>
+                        </div>
+                        <button onclick="logout()" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all" title="Keluar">
+                            <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Mobile menu button -->
+                    <div class="flex items-center md:hidden">
+                        <button onclick="toggleMobileMenu()" class="p-2 rounded-xl text-slate-600 hover:text-brand-600 hover:bg-slate-100 focus:outline-none">
+                            <i class="fa-solid fa-bars text-xl" id="mobile-menu-icon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Dropdown Menu -->
+            <div id="mobile-menu" class="hidden md:hidden border-t border-slate-100 bg-white px-4 pt-3 pb-5 space-y-2 shadow-lg">
+                <div class="flex items-center gap-3 py-2.5 px-3 bg-brand-50 rounded-xl mb-3">
+                    <div class="w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm" id="mobile-avatar-initial">
+                        U
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="text-sm font-bold text-slate-800 truncate" id="mobile-user-name">User Name</div>
+                        <div class="text-xs font-semibold text-brand-700 uppercase" id="mobile-user-role">Role</div>
+                    </div>
+                </div>
+                <div id="mobile-nav-user" class="space-y-1">
+                    <button onclick="navigateTo('home'); toggleMobileMenu();" class="w-full text-left px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-brand-50 hover:text-brand-600 font-semibold text-sm transition-all">
+                        <i class="fa-solid fa-house w-6 text-brand-600"></i>Beranda
+                    </button>
+                    <button onclick="navigateTo('orders'); toggleMobileMenu();" class="w-full text-left px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-brand-50 hover:text-brand-600 font-semibold text-sm transition-all">
+                        <i class="fa-solid fa-box-archive w-6 text-brand-600"></i>Pesanan Saya
+                    </button>
+                    <button onclick="navigateTo('profile'); toggleMobileMenu();" class="w-full text-left px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-brand-50 hover:text-brand-600 font-semibold text-sm transition-all">
+                        <i class="fa-solid fa-user w-6 text-brand-600"></i>Profil Saya
+                    </button>
+                </div>
+                <div id="mobile-nav-admin" class="space-y-1 hidden">
+                    <button onclick="navigateTo('admin'); toggleMobileMenu();" class="w-full text-left px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-brand-50 hover:text-brand-600 font-semibold text-sm transition-all">
+                        <i class="fa-solid fa-gauge-high w-6 text-brand-600"></i>Dashboard Admin
+                    </button>
+                    <button onclick="navigateTo('profile'); toggleMobileMenu();" class="w-full text-left px-3.5 py-2.5 rounded-xl text-slate-700 hover:bg-brand-50 hover:text-brand-600 font-semibold text-sm transition-all">
+                        <i class="fa-solid fa-user w-6 text-brand-600"></i>Profil Saya
+                    </button>
+                </div>
+                <button onclick="logout()" class="w-full text-left px-3.5 py-2.5 rounded-xl text-rose-600 hover:bg-rose-50 font-semibold text-sm transition-all mt-2">
+                    <i class="fa-solid fa-right-from-bracket w-6"></i>Keluar
+                </button>
+            </div>
+        </header>
+
+        <!-- CONTENT CONTAINERS -->
+        <main class="flex-grow">
+            
+            <!-- VIEW: LOGIN & REGISTER AUTHENTICATION -->
+            <section id="view-auth" class="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-brand-50 via-slate-50 to-emerald-50">
+                <div class="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-brand-900/5 overflow-hidden border border-brand-100">
+                    <div class="p-6 sm:p-8 text-center bg-gradient-to-r from-brand-700 via-brand-600 to-emerald-600 text-white relative">
+                        <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center shadow-inner">
+                            <i class="fa-solid fa-leaf text-3xl text-brand-100"></i>
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">SiberSupply</h1>
+                        <p class="text-brand-100 text-xs sm:text-sm mt-1">Penyelamatan & Berbagi Makanan Berkelanjutan</p>
+                        
+                        <!-- Role selector tabs -->
+                        <div class="flex mt-6 bg-brand-900/40 p-1.5 rounded-2xl backdrop-blur border border-white/10">
+                            <button id="role-tab-user" onclick="setAuthRole('user')" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all bg-white text-brand-800 shadow-md">
+                                <i class="fa-solid fa-user mr-1.5"></i> Akun User
+                            </button>
+                            <button id="role-tab-admin" onclick="setAuthRole('admin')" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all text-brand-100 hover:text-white">
+                                <i class="fa-solid fa-user-shield mr-1.5"></i> Akun Admin
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-6 sm:p-8">
+                        <!-- FORM SWITCHER BUTTONS -->
+                        <div class="flex border-b border-slate-200 mb-6">
+                            <button id="auth-mode-login-btn" onclick="switchAuthMode('login')" class="pb-3 text-sm font-bold border-b-2 border-brand-600 text-brand-600 flex-1 text-center transition-colors">
+                                Masuk
+                            </button>
+                            <button id="auth-mode-register-btn" onclick="switchAuthMode('register')" class="pb-3 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 flex-1 text-center transition-colors">
+                                Daftar Baru
+                            </button>
+                        </div>
+
+                        <!-- LOGIN FORM -->
+                        <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Username atau Email</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                        <i class="fa-solid fa-envelope"></i>
+                                    </span>
+                                    <input type="text" id="login-identifier" required class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all bg-slate-50/50 focus:bg-white" placeholder="Username atau email terdaftar">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kata Sandi</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                        <i class="fa-solid fa-lock"></i>
+                                    </span>
+                                    <input type="password" id="login-password" required class="w-full pl-10 pr-10 py-3 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all bg-slate-50/50 focus:bg-white" placeholder="••••••••">
+                                    <button type="button" onclick="togglePasswordVisibility('login-password', 'toggle-login-pass-icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600">
+                                        <i class="fa-solid fa-eye" id="toggle-login-pass-icon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-2xl text-sm shadow-lg shadow-brand-600/25 transition-all active:scale-[0.98] mt-2">
+                                Masuk ke Akun
+                            </button>
+                            <div class="mt-4 p-3.5 rounded-2xl bg-brand-50 border border-brand-100 text-xs text-slate-600">
+                                <div class="font-bold text-brand-800 mb-1 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-key"></i> Akun Pengujian Quick Demo:
+                                </div>
+                                <div class="space-y-0.5">
+                                    <div>• User: <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-brand-200 font-bold">user</span> / <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-brand-200">user123</span></div>
+                                    <div>• Admin: <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-brand-200 font-bold">admin</span> / <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-brand-200">admin123</span></div>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- REGISTER FORM -->
+                        <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                        <i class="fa-solid fa-id-card"></i>
+                                    </span>
+                                    <input type="text" id="reg-fullname" required class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all bg-slate-50/50 focus:bg-white" placeholder="Contoh: Ahmad Subagja">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                        <i class="fa-solid fa-envelope"></i>
+                                    </span>
+                                    <input type="email" id="reg-email" required class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all bg-slate-50/50 focus:bg-white" placeholder="ahmad@email.com">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Username</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                        <i class="fa-solid fa-at"></i>
+                                    </span>
+                                    <input type="text" id="reg-username" required class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all bg-slate-50/50 focus:bg-white" placeholder="ahmad123">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kata Sandi</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                        <i class="fa-solid fa-lock"></i>
+                                    </span>
+                                    <input type="password" id="reg-password" required minlength="6" class="w-full pl-10 pr-10 py-3 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all bg-slate-50/50 focus:bg-white" placeholder="Minimal 6 karakter">
+                                    <button type="button" onclick="togglePasswordVisibility('reg-password', 'toggle-reg-pass-icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600">
+                                        <i class="fa-solid fa-eye" id="toggle-reg-pass-icon"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Admin Key Input (Only visible when Admin tab active) -->
+                            <div id="admin-key-container" class="hidden">
+                                <label class="block text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1.5">Kunci Rahasia Admin</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                                        <i class="fa-solid fa-shield-halved text-brand-600"></i>
+                                    </span>
+                                    <input type="text" id="reg-admin-key" class="w-full pl-10 pr-4 py-3 rounded-2xl border border-brand-300 text-sm focus:outline-none focus:border-brand-500 bg-brand-50/50" placeholder="Gunakan: ADMIN123">
+                                </div>
+                                <p class="text-[11px] text-slate-500 mt-1">Masukkan <span class="font-bold text-brand-700">ADMIN123</span> untuk validasi pendaftaran admin.</p>
+                            </div>
+
+                            <button type="submit" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-2xl text-sm shadow-lg shadow-brand-600/25 transition-all active:scale-[0.98] mt-2">
+                                Buat Akun Baru (<span id="reg-role-label">User</span>)
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: USER HOME / CATALOG -->
+            <section id="view-home" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+                <!-- HERO / SEARCH BANNER -->
+                <div class="bg-gradient-to-r from-brand-800 via-brand-700 to-emerald-600 rounded-3xl p-6 sm:p-10 text-white shadow-xl shadow-brand-900/10 mb-8 relative overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
+                    <div class="max-w-2xl relative z-10">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur text-xs font-bold text-brand-100 mb-3 border border-white/20">
+                            <i class="fa-solid fa-shield-heart"></i> Food Waste Reduction Campaign
+                        </span>
+                        <h2 class="text-2xl sm:text-4xl font-black tracking-tight mb-3">Selamatkan & Bagikan Makanan Segar</h2>
+                        <p class="text-brand-100 text-xs sm:text-base mb-6 leading-relaxed">Pesan makanan gratis atau berbayar sebelum masa ketahanan berakhir. Cegah pemborosan makanan sekarang!</p>
+
+                        <!-- SEARCH INPUT -->
+                        <div class="relative max-w-xl">
+                            <input type="text" id="search-input" oninput="handleFilterChange()" placeholder="Cari makanan (contoh: Nasi Goreng, Roti, Kopi)..." class="w-full pl-11 pr-4 py-3.5 sm:py-4 rounded-2xl bg-white text-slate-800 placeholder-slate-400 text-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-300/50 font-medium">
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FILTERS SECTION -->
+                <div class="space-y-4 mb-8">
+                    <!-- CATEGORY CHIPS -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Kategori Makanan</label>
+                            <span class="text-xs text-brand-700 font-semibold cursor-pointer hover:underline" onclick="selectCategory('Semua')">Reset Kategori</span>
+                        </div>
+                        <div class="flex items-center gap-2 overflow-x-auto pb-2 hide-scrollbar" id="category-chips">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- PRICE & SORT FILTERS -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-slate-200">
+                        <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" id="price-chips">
+                            <!-- Injected by JS -->
+                        </div>
+                        <div class="flex items-center gap-2 self-end sm:self-auto">
+                            <label class="text-xs font-bold text-slate-500 whitespace-nowrap"><i class="fa-solid fa-arrow-down-wide-short mr-1"></i>Urutan:</label>
+                            <select id="sort-select" onchange="handleFilterChange()" class="bg-white border border-slate-200 text-xs rounded-xl px-3 py-2 font-semibold text-slate-700 focus:outline-none focus:border-brand-500 shadow-sm">
+                                <option value="latest">Terbaru</option>
+                                <option value="price-asc">Harga: Termurah</option>
+                                <option value="price-desc">Harga: Tertinggi</option>
+                                <option value="expiry-asc">Segera Kadaluarsa</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FOOD GRID -->
+                <div id="food-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    <!-- Cards dynamic insertion -->
+                </div>
+                <div id="food-empty" class="hidden text-center py-16 bg-white rounded-3xl border border-dashed border-slate-200">
+                    <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+                    <h3 class="text-slate-800 font-bold text-lg">Makanan Tidak Ditemukan</h3>
+                    <p class="text-slate-400 text-xs mt-1">Coba sesuaikan kata kunci atau filter pencarian Anda.</p>
+                </div>
+            </section>
+
+            <!-- VIEW: USER ORDERS (PESANAN SAYA) -->
+            <section id="view-orders" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-extrabold text-slate-800">Pesanan Saya</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Kelola dan pantau waktu pengambilan makanan yang Anda klaim.</p>
+                </div>
+
+                <!-- ORDER TABS -->
+                <div class="flex border-b border-slate-200 mb-6 gap-2 sm:gap-6 overflow-x-auto hide-scrollbar">
+                    <button id="order-tab-active" onclick="switchOrderTab('active')" class="pb-3 text-xs sm:text-sm font-bold border-b-2 border-brand-600 text-brand-600 flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Menu yang Diambil 
+                        <span id="badge-count-active" class="px-2 py-0.5 text-[10px] bg-brand-100 text-brand-700 rounded-full font-extrabold">0</span>
+                    </button>
+                    <button id="order-tab-history" onclick="switchOrderTab('history')" class="pb-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-circle-check"></i> Riwayat Selesai
+                    </button>
+                    <button id="order-tab-expired" onclick="switchOrderTab('expired')" class="pb-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Kadaluarsa / Batal 
+                        <span id="badge-count-expired" class="px-2 py-0.5 text-[10px] bg-rose-100 text-rose-700 rounded-full font-extrabold">0</span>
+                    </button>
+                </div>
+
+                <div class="mb-6 bg-amber-50 border border-amber-200 text-amber-900 p-4 rounded-2xl text-xs flex items-start gap-3 shadow-sm">
+                    <i class="fa-solid fa-circle-info text-amber-600 text-base mt-0.5 flex-shrink-0"></i>
+                    <div>
+                        <strong class="font-bold">Ketentuan Pengambilan & Otomatisasi Sistem:</strong>
+                        <ul class="list-disc list-inside mt-1 space-y-0.5 text-amber-800">
+                            <li>Setiap pemesanan memiliki waktu batas pengambilan <strong>30 Menit</strong>. Jika terlambat, pesanan otomatis dibatalkan.</li>
+                            <li>Riwayat pesanan yang sudah diambil atau kadaluarsa akan dihapus otomatis setelah <strong>24 jam</strong>.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- ORDERS LIST -->
+                <div id="orders-container" class="space-y-4">
+                    <!-- Dynamic Orders -->
+                </div>
+            </section>
+
+            <!-- VIEW: USER & ADMIN PROFILE -->
+            <section id="view-profile" class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-6 sm:p-8 bg-gradient-to-r from-brand-700 via-brand-600 to-emerald-600 text-white flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-5">
+                        <div class="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur border border-white/30 text-white flex items-center justify-center font-black text-3xl shadow-inner" id="profile-avatar-big">
+                            U
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-black" id="profile-full-name">Nama Lengkap</h2>
+                            <p class="text-brand-100 text-xs sm:text-sm mt-0.5" id="profile-username-tag">@username</p>
+                            <span class="inline-block mt-2.5 px-3 py-1 rounded-full bg-white/20 text-white text-[10px] uppercase font-black tracking-wider border border-white/20" id="profile-role-badge">USER</span>
+                        </div>
+                    </div>
+
+                    <div class="p-6 sm:p-8 space-y-8">
+                        <!-- DETAIL INFO -->
+                        <div>
+                            <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Informasi Akun Anda</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <span class="text-xs text-slate-400 block font-medium">Nama Lengkap</span>
+                                    <span class="text-sm font-bold text-slate-800 mt-0.5 block" id="profile-detail-name">-</span>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <span class="text-xs text-slate-400 block font-medium">Alamat Email</span>
+                                    <span class="text-sm font-bold text-slate-800 mt-0.5 block truncate" id="profile-detail-email">-</span>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <span class="text-xs text-slate-400 block font-medium">Username</span>
+                                    <span class="text-sm font-bold text-slate-800 mt-0.5 block" id="profile-detail-username">-</span>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <span class="text-xs text-slate-400 block font-medium">Peran Hak Akses</span>
+                                    <span class="text-sm font-extrabold text-brand-600 uppercase mt-0.5 block" id="profile-detail-role">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RESET PASSWORD FORM -->
+                        <div>
+                            <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Reset / Ganti Kata Sandi</h3>
+                            <form onsubmit="handleResetPassword(event)" class="space-y-4 max-w-md">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Kata Sandi Saat Ini</label>
+                                    <div class="relative">
+                                        <input type="password" id="reset-old-pass" required class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500">
+                                        <button type="button" onclick="togglePasswordVisibility('reset-old-pass', 'toggle-old-pass-icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                                            <i class="fa-solid fa-eye" id="toggle-old-pass-icon"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Kata Sandi Baru</label>
+                                    <div class="relative">
+                                        <input type="password" id="reset-new-pass" required minlength="6" class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500">
+                                        <button type="button" onclick="togglePasswordVisibility('reset-new-pass', 'toggle-new-pass-icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                                            <i class="fa-solid fa-eye" id="toggle-new-pass-icon"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-brand-600/20 active:scale-95">
+                                    Simpan Perubahan Kata Sandi
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: ADMIN DASHBOARD (CRUD) -->
+            <section id="view-admin" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-slate-800">Manajemen Pangan (Admin)</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Kelola data makanan, stok, harga, dan visibilitas di katalog pasar.</p>
+                    </div>
+                    <button onclick="openAdminModal()" class="inline-flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white px-4 py-3 rounded-2xl text-xs font-bold shadow-lg shadow-brand-600/20 transition-all active:scale-95">
+                        <i class="fa-solid fa-plus text-sm"></i> Tambah Makanan Baru
+                    </button>
+                </div>
+
+                <!-- STATS CARDS -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Menu</span>
+                            <h3 class="text-2xl font-black text-slate-800 mt-1" id="stat-total-food">0</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-bowl-food"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Makanan Gratis</span>
+                            <h3 class="text-2xl font-black text-brand-600 mt-1" id="stat-free-food">0</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-gift"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Klaim</span>
+                            <h3 class="text-2xl font-black text-blue-600 mt-1" id="stat-total-orders">0</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADMIN DATA TABLE -->
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-[11px] uppercase font-extrabold text-slate-400 tracking-wider">
+                                <tr>
+                                    <th class="py-4 px-4">Makanan</th>
+                                    <th class="py-4 px-4">Kategori</th>
+                                    <th class="py-4 px-4">Stok</th>
+                                    <th class="py-4 px-4">Harga</th>
+                                    <th class="py-4 px-4">Ketahanan Live</th>
+                                    <th class="py-4 px-4">Visibilitas</th>
+                                    <th class="py-4 px-4 text-right">Aksi Management</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-food-table" class="divide-y divide-slate-100 font-medium">
+                                <!-- Dynamic Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ORDER CONFIRMATION MODAL -->
+    <div id="modal-order-confirm" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 text-center relative overflow-hidden animate-fadeIn">
+            <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-xl font-extrabold text-slate-800 mb-2">Konfirmasi Pemesanan</h3>
+            <p class="text-xs text-slate-600 mb-4" id="order-modal-food-name">Anda akan memesan makanan ini.</p>
+            
+            <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-left text-xs text-amber-900 mb-6">
+                <div class="font-bold mb-1 text-amber-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-clock"></i> Peringatan Batas Pengambilan:
+                </div>
+                Anda memiliki waktu <strong>30 menit</strong> untuk mengambil makanan ini di lokasi penyerahan. Apabila tidak diambil tepat waktu, pesanan akan <strong>otomatis dibatalkan</strong> oleh sistem!
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="closeOrderConfirmModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-2xl transition-all">
+                    Batal
+                </button>
+                <button id="btn-confirm-order-action" class="flex-1 py-3 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-2xl transition-all shadow-md shadow-brand-600/20">
+                    Setuju & Pesan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ADD / EDIT FOOD (ADMIN) -->
+    <div id="admin-food-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeAdminModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-lg font-extrabold text-slate-800 mb-4" id="modal-title">Tambah Makanan Baru</h3>
+            <form id="form-admin-food" onsubmit="handleSaveFood(event)" class="space-y-4">
+                <input type="hidden" id="food-id">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Makanan</label>
+                    <input type="text" id="food-name" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" placeholder="Contoh: Roti Tawar Gandum">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Kategori</label>
+                        <select id="food-category" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                            <option value="Makanan Berat">Makanan Berat</option>
+                            <option value="Lauk Pauk">Lauk Pauk</option>
+                            <option value="Roti & Kue">Roti & Kue</option>
+                            <option value="Buah & Sayur">Buah & Sayur</option>
+                            <option value="Minuman">Minuman</option>
+                            <option value="Cemilan">Cemilan</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Stok Makanan</label>
+                        <input type="number" id="food-stock" min="1" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" placeholder="Contoh: 10">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Harga (Rp)</label>
+                        <input type="number" id="food-price" min="0" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" placeholder="0 untuk Gratis">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Ketahanan (Jam)</label>
+                        <input type="number" id="food-duration-hours" min="1" max="168" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" placeholder="Berapa jam layak makan">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">URL Foto Makanan</label>
+                    <input type="url" id="food-image" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500" placeholder="https://images.unsplash.com/...">
+                </div>
+                <div class="pt-3 flex gap-3 justify-end">
+                    <button type="button" onclick="closeAdminModal()" class="px-4 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-xs font-bold">Batal</button>
+                    <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- CONSTANTS & INITIAL DATA ---
+        const CATEGORIES = [
+            "Semua", "Makanan Berat", "Lauk Pauk", "Roti & Kue", 
+            "Buah & Sayur", "Minuman", "Cemilan", "Lainnya"
+        ];
+
+        const INITIAL_USERS = [
+            { fullname: "Pengguna SiberSupply", email: "user@sibersupply.id", username: "user", password: "user123", role: "user" },
+            { fullname: "Administrator Utama", email: "admin@sibersupply.id", username: "admin", password: "admin123", role: "admin" }
+        ];
+
+        const INITIAL_FOODS = [
+            {
+                id: 'food-1',
+                name: 'Nasi Kotak Ayam Bakar',
+                category: 'Makanan Berat',
+                price: 0,
+                stock: 8,
+                image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
+                expiryTime: Date.now() + (5 * 3600 * 1000), // 5 hours from now
+                hidden: false
+            },
+            {
+                id: 'food-2',
+                name: 'Roti Croissant Keju Segar',
+                category: 'Roti & Kue',
+                price: 12000,
+                stock: 5,
+                image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&auto=format&fit=crop&q=80',
+                expiryTime: Date.now() + (12 * 3600 * 1000),
+                hidden: false
+            },
+            {
+                id: 'food-3',
+                name: 'Apel Red Delicious (1 Kg)',
+                category: 'Buah & Sayur',
+                price: 0,
+                stock: 12,
+                image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=600&auto=format&fit=crop&q=80',
+                expiryTime: Date.now() + (24 * 3600 * 1000),
+                hidden: false
+            },
+            {
+                id: 'food-4',
+                name: 'Matcha Latte Ice Refreshing',
+                category: 'Minuman',
+                price: 15000,
+                stock: 4,
+                image: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=600&auto=format&fit=crop&q=80',
+                expiryTime: Date.now() + (3 * 3600 * 1000),
+                hidden: false
+            },
+            {
+                id: 'food-5',
+                name: 'Keripik Pisang Caramel Crisp',
+                category: 'Cemilan',
+                price: 8000,
+                stock: 15,
+                image: 'https://images.unsplash.com/photo-1621996346565-e3d5d6281313?w=600&auto=format&fit=crop&q=80',
+                expiryTime: Date.now() + (48 * 3600 * 1000),
+                hidden: false
+            }
+        ];
+
+        // STATE INITIALIZATION WITH LOCAL STORAGE
+        let users = JSON.parse(localStorage.getItem('ss_users')) || INITIAL_USERS;
+        let foods = JSON.parse(localStorage.getItem('ss_foods')) || INITIAL_FOODS;
+        let orders = JSON.parse(localStorage.getItem('ss_orders')) || [];
+        let currentUser = JSON.parse(localStorage.getItem('ss_current_user')) || null;
+
+        let activeAuthRole = 'user'; // 'user' | 'admin'
+        let activeAuthMode = 'login'; // 'login' | 'register'
+        let selectedCategory = 'Semua';
+        let selectedPriceFilter = 'all'; // 'all' | 'free' | 'paid'
+        let orderTabState = 'active'; // 'active' | 'history' | 'expired'
+        let pendingClaimFoodId = null;
+
+        // SAVE STATE
+        function saveData() {
+            localStorage.setItem('ss_users', JSON.stringify(users));
+            localStorage.setItem('ss_foods', JSON.stringify(foods));
+            localStorage.setItem('ss_orders', JSON.stringify(orders));
+            localStorage.setItem('ss_current_user', JSON.stringify(currentUser));
+        }
+
+        // AUTO CLEANUP SYSTEM (24 Hours for Picked / Expired Orders & 30 Min Auto-Cancel)
+        function performAutoCleanup() {
+            const now = Date.now();
+            const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+            const THIRTY_MINUTES = 30 * 60 * 1000;
+
+            let stateChanged = false;
+
+            orders.forEach(order => {
+                // 30 minute pickup limit check for active claimed orders
+                if (order.status === 'claimed') {
+                    const pickupDeadline = order.claimedAt + THIRTY_MINUTES;
+                    if (now > pickupDeadline) {
+                        order.status = 'expired';
+                        order.cancelReason = 'Waktu pengambilan 30 menit telah habis';
+                        order.updatedAt = now;
+                        stateChanged = true;
+                    }
+                }
+            });
+
+            // Clean orders older than 24h
+            const initialCount = orders.length;
+            orders = orders.filter(order => {
+                if (order.status === 'picked' || order.status === 'expired') {
+                    return (now - order.updatedAt) < TWENTY_FOUR_HOURS;
+                }
+                return true;
+            });
+
+            if (orders.length !== initialCount) stateChanged = true;
+
+            if (stateChanged) saveData();
+        }
+
+        // APP LOAD INITIALIZATION
+        window.onload = function() {
+            performAutoCleanup();
+            renderCategoryChips();
+            renderPriceChips();
+            
+            if (currentUser) {
+                updateNav();
+                navigateTo(currentUser.role === 'admin' ? 'admin' : 'home');
+            } else {
+                navigateTo('auth');
+            }
+
+            // Realtime Countdown Timers
+            setInterval(() => {
+                performAutoCleanup();
+                updateLiveTimers();
+            }, 1000);
+        };
+
+        // --- AUTHENTICATION MODULE ---
+        function setAuthRole(role) {
+            activeAuthRole = role;
+            const userTab = document.getElementById('role-tab-user');
+            const adminTab = document.getElementById('role-tab-admin');
+            const regRoleLabel = document.getElementById('reg-role-label');
+            const adminKeyContainer = document.getElementById('admin-key-container');
+
+            if (role === 'user') {
+                userTab.className = "flex-1 py-2 text-xs font-bold rounded-xl transition-all bg-white text-brand-800 shadow-md";
+                adminTab.className = "flex-1 py-2 text-xs font-bold rounded-xl transition-all text-brand-100 hover:text-white";
+                regRoleLabel.innerText = "User";
+                adminKeyContainer.classList.add('hidden');
+            } else {
+                adminTab.className = "flex-1 py-2 text-xs font-bold rounded-xl transition-all bg-white text-brand-800 shadow-md";
+                userTab.className = "flex-1 py-2 text-xs font-bold rounded-xl transition-all text-brand-100 hover:text-white";
+                regRoleLabel.innerText = "Admin";
+                adminKeyContainer.classList.remove('hidden');
+            }
+        }
+
+        function switchAuthMode(mode) {
+            activeAuthMode = mode;
+            const loginBtn = document.getElementById('auth-mode-login-btn');
+            const regBtn = document.getElementById('auth-mode-register-btn');
+            const formLogin = document.getElementById('form-login');
+            const formRegister = document.getElementById('form-register');
+
+            if (mode === 'login') {
+                loginBtn.className = "pb-3 text-sm font-bold border-b-2 border-brand-600 text-brand-600 flex-1 text-center transition-colors";
+                regBtn.className = "pb-3 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 flex-1 text-center transition-colors";
+                formLogin.classList.remove('hidden');
+                formRegister.classList.add('hidden');
+            } else {
+                regBtn.className = "pb-3 text-sm font-bold border-b-2 border-brand-600 text-brand-600 flex-1 text-center transition-colors";
+                loginBtn.className = "pb-3 text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 flex-1 text-center transition-colors";
+                formRegister.classList.remove('hidden');
+                formLogin.classList.add('hidden');
+            }
+        }
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const identifier = document.getElementById('login-identifier').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            const user = users.find(u => 
+                (u.username.toLowerCase() === identifier.toLowerCase() || u.email.toLowerCase() === identifier.toLowerCase()) &&
+                u.password === password &&
+                u.role === activeAuthRole
+            );
+
+            if (user) {
+                currentUser = user;
+                saveData();
+                showToast(`Selamat datang kembali, ${user.fullname}!`, 'success');
+                updateNav();
+                navigateTo(user.role === 'admin' ? 'admin' : 'home');
+            } else {
+                showToast(`Gagal Masuk: Username/Password salah atau peran ${activeAuthRole.toUpperCase()} tidak sesuai.`, 'error');
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const fullname = document.getElementById('reg-fullname').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const username = document.getElementById('reg-username').value.trim();
+            const password = document.getElementById('reg-password').value;
+
+            if (activeAuthRole === 'admin') {
+                const adminKey = document.getElementById('reg-admin-key').value.trim();
+                if (adminKey !== 'ADMIN123') {
+                    showToast('Kunci rahasia Admin salah! (Gunakan: ADMIN123)', 'error');
+                    return;
+                }
+            }
+
+            if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+                showToast('Username sudah digunakan!', 'error');
+                return;
+            }
+            if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+                showToast('Email sudah terdaftar!', 'error');
+                return;
+            }
+
+            const newUser = { fullname, email, username, password, role: activeAuthRole };
+            users.push(newUser);
+            currentUser = newUser;
+            saveData();
+
+            showToast(`Akun ${activeAuthRole.toUpperCase()} berhasil dibuat!`, 'success');
+            updateNav();
+            navigateTo(newUser.role === 'admin' ? 'admin' : 'home');
+        }
+
+        function logout() {
+            currentUser = null;
+            saveData();
+            showToast('Anda telah keluar dari sistem.', 'info');
+            updateNav();
+            navigateTo('auth');
+        }
+
+        // --- NAVIGATION CONTROLLER ---
+        function navigateTo(viewName) {
+            const views = ['auth', 'home', 'orders', 'profile', 'admin'];
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.add('hidden');
+            });
+
+            const nav = document.getElementById('main-nav');
+            if (viewName === 'auth') {
+                nav.classList.add('hidden');
+            } else {
+                nav.classList.remove('hidden');
+            }
+
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+
+            if (viewName === 'home') renderFoodGrid();
+            if (viewName === 'orders') renderOrders();
+            if (viewName === 'profile') renderProfile();
+            if (viewName === 'admin') renderAdminTable();
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateNav() {
+            if (!currentUser) return;
+            const initial = currentUser.fullname.charAt(0).toUpperCase();
+            
+            document.getElementById('user-avatar-initial').innerText = initial;
+            document.getElementById('mobile-avatar-initial').innerText = initial;
+            document.getElementById('nav-user-name').innerText = currentUser.fullname;
+            document.getElementById('mobile-user-name').innerText = currentUser.fullname;
+            document.getElementById('nav-user-role').innerText = currentUser.role;
+            document.getElementById('mobile-user-role').innerText = currentUser.role;
+
+            const userNav = document.getElementById('nav-links-user');
+            const adminNav = document.getElementById('nav-links-admin');
+            const mobileUserNav = document.getElementById('mobile-nav-user');
+            const mobileAdminNav = document.getElementById('mobile-nav-admin');
+
+            if (currentUser.role === 'admin') {
+                userNav.classList.add('hidden');
+                adminNav.classList.remove('hidden');
+                mobileUserNav.classList.add('hidden');
+                mobileAdminNav.classList.remove('hidden');
+            } else {
+                userNav.classList.remove('hidden');
+                adminNav.classList.add('hidden');
+                mobileUserNav.classList.remove('hidden');
+                mobileAdminNav.classList.add('hidden');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- MARKETPLACE CATALOG & FILTERS ---
+        function renderCategoryChips() {
+            const container = document.getElementById('category-chips');
+            container.innerHTML = CATEGORIES.map(cat => `
+                <button onclick="selectCategory('${cat}')" class="px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
+                    selectedCategory === cat 
+                    ? 'bg-brand-600 text-white shadow-md shadow-brand-600/20' 
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                }">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function renderPriceChips() {
+            const container = document.getElementById('price-chips');
+            const options = [
+                { id: 'all', label: 'Semua Harga' },
+                { id: 'free', label: 'Gratis (Rp 0)' },
+                { id: 'paid', label: 'Berbayar' }
+            ];
+
+            container.innerHTML = options.map(opt => `
+                <button onclick="selectPriceFilter('${opt.id}')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    selectedPriceFilter === opt.id
+                    ? 'bg-brand-100 text-brand-800 border border-brand-300'
+                    : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                }">
+                    ${opt.label}
+                </button>
+            `).join('');
+        }
+
+        function selectCategory(cat) {
+            selectedCategory = cat;
+            renderCategoryChips();
+            renderFoodGrid();
+        }
+
+        function selectPriceFilter(type) {
+            selectedPriceFilter = type;
+            renderPriceChips();
+            renderFoodGrid();
+        }
+
+        function handleFilterChange() {
+            renderFoodGrid();
+        }
+
+        function renderFoodGrid() {
+            const grid = document.getElementById('food-grid');
+            const emptyState = document.getElementById('food-empty');
+            const searchKeyword = document.getElementById('search-input').value.toLowerCase();
+            const sortOption = document.getElementById('sort-select').value;
+
+            let filtered = foods.filter(item => !item.hidden);
+
+            if (selectedCategory !== 'Semua') {
+                filtered = filtered.filter(item => item.category === selectedCategory);
+            }
+
+            if (selectedPriceFilter === 'free') {
+                filtered = filtered.filter(item => item.price === 0);
+            } else if (selectedPriceFilter === 'paid') {
+                filtered = filtered.filter(item => item.price > 0);
+            }
+
+            if (searchKeyword) {
+                filtered = filtered.filter(item => item.name.toLowerCase().includes(searchKeyword));
+            }
+
+            if (sortOption === 'price-asc') {
+                filtered.sort((a, b) => a.price - b.price);
+            } else if (sortOption === 'price-desc') {
+                filtered.sort((a, b) => b.price - a.price);
+            } else if (sortOption === 'expiry-asc') {
+                filtered.sort((a, b) => a.expiryTime - b.expiryTime);
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            grid.innerHTML = filtered.map(item => {
+                const isFree = item.price === 0;
+                const formattedPrice = isFree ? 'GRATIS' : `Rp ${item.price.toLocaleString('id-ID')}`;
+                
+                return `
+                    <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group">
+                        <div class="relative h-48 overflow-hidden bg-slate-100">
+                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80'">
+                            <span class="absolute top-3 left-3 px-3 py-1 bg-white/90 backdrop-blur rounded-full text-[10px] font-extrabold text-slate-700 shadow-sm border border-slate-100">
+                                ${item.category}
+                            </span>
+                            <span class="absolute top-3 right-3 px-3.5 py-1 rounded-full text-xs font-black ${isFree ? 'bg-brand-600 text-white' : 'bg-slate-900/80 backdrop-blur text-white'} shadow-md">
+                                ${formattedPrice}
+                            </span>
+                        </div>
+                        
+                        <div class="p-5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-base line-clamp-1 group-hover:text-brand-600 transition-colors">${item.name}</h3>
+                                <div class="text-xs text-slate-400 mt-1 flex items-center gap-1 font-semibold">
+                                    <i class="fa-solid fa-boxes-stacked text-brand-600"></i> Stok: ${item.stock} porsi
+                                </div>
+
+                                <!-- Live Expiry Countdown Badge -->
+                                <div class="mt-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                                    <span class="text-[11px] font-bold text-slate-400 uppercase">Ketahanan:</span>
+                                    <span class="font-mono text-xs font-black text-amber-600 countdown-food-badge" data-expiry="${item.expiryTime}">
+                                        Calculating...
+                                    </span>
+                                </div>
+                            </div>
+
+                            <button onclick="promptClaimFood('${item.id}')" ${item.stock <= 0 ? 'disabled' : ''} class="mt-4 w-full py-3 ${item.stock > 0 ? 'bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/20 active:scale-95' : 'bg-slate-200 text-slate-400 cursor-not-allowed'} text-xs font-bold rounded-2xl transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-hand-holding-heart"></i> ${item.stock > 0 ? (isFree ? 'Ambil Gratis' : 'Pesan Sekarang') : 'Stok Habis'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateLiveTimers();
+        }
+
+        // --- ORDER PROMPT & CLAIM LOGIC ---
+        function promptClaimFood(foodId) {
+            if (!currentUser) {
+                showToast('Silakan masuk terlebih dahulu untuk memesan!', 'error');
+                navigateTo('auth');
+                return;
+            }
+
+            const food = foods.find(f => f.id === foodId);
+            if (!food) return;
+
+            pendingClaimFoodId = foodId;
+            document.getElementById('order-modal-food-name').innerHTML = `Anda akan memesan <strong>${food.name}</strong> (${food.price === 0 ? 'GRATIS' : 'Rp ' + food.price.toLocaleString('id-ID')}).`;
+            document.getElementById('btn-confirm-order-action').onclick = function() {
+                confirmClaimFood();
+            };
+
+            document.getElementById('modal-order-confirm').classList.remove('hidden');
+        }
+
+        function closeOrderConfirmModal() {
+            document.getElementById('modal-order-confirm').classList.add('hidden');
+            pendingClaimFoodId = null;
+        }
+
+        function confirmClaimFood() {
+            if (!pendingClaimFoodId) return;
+
+            const food = foods.find(f => f.id === pendingClaimFoodId);
+            if (!food || food.stock <= 0) {
+                showToast('Stok makanan telah habis!', 'error');
+                closeOrderConfirmModal();
+                return;
+            }
+
+            // Deduct stock
+            food.stock -= 1;
+
+            const now = Date.now();
+            const newOrder = {
+                id: 'ord-' + Date.now(),
+                userId: currentUser.username,
+                foodId: food.id,
+                foodName: food.name,
+                category: food.category,
+                price: food.price,
+                image: food.image,
+                claimedAt: now,
+                updatedAt: now,
+                status: 'claimed' // 'claimed' | 'picked' | 'expired'
+            };
+
+            orders.unshift(newOrder);
+            saveData();
+            closeOrderConfirmModal();
+            showToast(`Pesanan ${food.name} berhasil! Ambil makanan dalam 30 menit.`, 'success');
+            navigateTo('orders');
+        }
+
+        // --- REALTIME TIMERS & COUNTDOWNS ---
+        function updateLiveTimers() {
+            const now = Date.now();
+
+            // Marketplace items expiration timer
+            document.querySelectorAll('.countdown-food-badge').forEach(el => {
+                const expiry = parseInt(el.getAttribute('data-expiry'));
+                const diff = expiry - now;
+
+                if (diff <= 0) {
+                    el.innerText = "Kadaluarsa";
+                    el.className = "font-mono text-xs font-black text-rose-600 countdown-food-badge";
+                } else {
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    const pad = (n) => n < 10 ? '0' + n : n;
+                    el.innerText = `${pad(hours)}j ${pad(minutes)}m ${pad(seconds)}d`;
+                }
+            });
+
+            // 30 minute pickup timer in Orders tab
+            document.querySelectorAll('.pickup-countdown-badge').forEach(el => {
+                const claimedAt = parseInt(el.getAttribute('data-claimed'));
+                const THIRTY_MINUTES = 30 * 60 * 1000;
+                const deadline = claimedAt + THIRTY_MINUTES;
+                const diff = deadline - now;
+
+                if (diff <= 0) {
+                    el.innerText = "Waktu Habis (Dibatalkan)";
+                    el.className = "font-mono text-xs font-black text-rose-600 pickup-countdown-badge";
+                } else {
+                    const minutes = Math.floor(diff / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    const pad = (n) => n < 10 ? '0' + n : n;
+                    el.innerText = `${pad(minutes)}m ${pad(seconds)}d`;
+                }
+            });
+        }
+
+        // --- PESANAN SAYA (MY ORDERS MODULE) ---
+        function switchOrderTab(tab) {
+            orderTabState = tab;
+            const activeBtn = document.getElementById('order-tab-active');
+            const historyBtn = document.getElementById('order-tab-history');
+            const expiredBtn = document.getElementById('order-tab-expired');
+
+            [activeBtn, historyBtn, expiredBtn].forEach(b => b.className = "pb-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap");
+
+            if (tab === 'active') activeBtn.className = "pb-3 text-xs sm:text-sm font-bold border-b-2 border-brand-600 text-brand-600 flex items-center gap-2 whitespace-nowrap";
+            if (tab === 'history') historyBtn.className = "pb-3 text-xs sm:text-sm font-bold border-b-2 border-brand-600 text-brand-600 flex items-center gap-2 whitespace-nowrap";
+            if (tab === 'expired') expiredBtn.className = "pb-3 text-xs sm:text-sm font-bold border-b-2 border-rose-600 text-rose-600 flex items-center gap-2 whitespace-nowrap";
+
+            renderOrders();
+        }
+
+        function renderOrders() {
+            if (!currentUser) return;
+            const container = document.getElementById('orders-container');
+            const userOrders = orders.filter(o => o.userId === currentUser.username);
+
+            const activeOrders = userOrders.filter(o => o.status === 'claimed');
+            const historyOrders = userOrders.filter(o => o.status === 'picked');
+            const expiredOrders = userOrders.filter(o => o.status === 'expired');
+
+            document.getElementById('badge-count-active').innerText = activeOrders.length;
+            document.getElementById('badge-count-expired').innerText = expiredOrders.length;
+
+            let currentList = [];
+            if (orderTabState === 'active') currentList = activeOrders;
+            if (orderTabState === 'history') currentList = historyOrders;
+            if (orderTabState === 'expired') currentList = expiredOrders;
+
+            if (currentList.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-3xl border border-slate-100">
+                        <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-2"></i>
+                        <p class="text-xs font-semibold text-slate-400">Tidak ada makanan pada kategori ini.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = currentList.map(item => {
+                const isFree = item.price === 0;
+                return `
+                    <div class="bg-white rounded-3xl border border-slate-200 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+                        <div class="flex items-center gap-4">
+                            <img src="${item.image}" alt="${item.foodName}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover bg-slate-100 flex-shrink-0" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80'">
+                            <div>
+                                <span class="text-[10px] uppercase font-black text-brand-700 bg-brand-50 border border-brand-200 px-2.5 py-0.5 rounded-full">${item.category}</span>
+                                <h4 class="font-bold text-slate-800 text-base mt-1 line-clamp-1">${item.foodName}</h4>
+                                <div class="flex items-center gap-3 text-xs text-slate-500 mt-1 font-medium">
+                                    <span class="font-bold text-slate-700">${isFree ? 'Gratis' : `Rp ${item.price.toLocaleString('id-ID')}`}</span>
+                                    <span>•</span>
+                                    <span>Jam Pesan: ${new Date(item.claimedAt).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full sm:w-auto flex sm:flex-col items-center sm:items-end justify-between gap-3 border-t sm:border-0 pt-3 sm:pt-0 border-slate-100">
+                            ${orderTabState === 'active' ? `
+                                <div class="text-left sm:text-right">
+                                    <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">Sisa Waktu Pengambilan:</span>
+                                    <span class="font-mono text-sm font-black text-amber-600 pickup-countdown-badge" data-claimed="${item.claimedAt}">Calculating...</span>
+                                </div>
+                                <button onclick="markAsPicked('${item.id}')" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md shadow-brand-600/20 transition-all active:scale-95">
+                                    <i class="fa-solid fa-check mr-1.5"></i> Konfirmasi Diambil
+                                </button>
+                            ` : ''}
+
+                            ${orderTabState === 'history' ? `
+                                <span class="px-3.5 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center gap-1.5">
+                                    <i class="fa-solid fa-circle-check"></i> Selesai Diambil
+                                </span>
+                            ` : ''}
+
+                            ${orderTabState === 'expired' ? `
+                                <div class="text-left sm:text-right">
+                                    <span class="px-3.5 py-1.5 rounded-full bg-rose-100 text-rose-800 text-xs font-bold inline-flex items-center gap-1.5">
+                                        <i class="fa-solid fa-circle-xmark"></i> Dibatalkan / Kadaluarsa
+                                    </span>
+                                    ${item.cancelReason ? `<p class="text-[11px] text-rose-600 mt-1 font-medium">${item.cancelReason}</p>` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateLiveTimers();
+        }
+
+        function markAsPicked(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = 'picked';
+                order.updatedAt = Date.now();
+                saveData();
+                showToast('Terima kasih! Pesanan diselesaikan.', 'success');
+                renderOrders();
+            }
+        }
+
+        // --- PROFILE MODULE ---
+        function renderProfile() {
+            if (!currentUser) return;
+            document.getElementById('profile-avatar-big').innerText = currentUser.fullname.charAt(0).toUpperCase();
+            document.getElementById('profile-full-name').innerText = currentUser.fullname;
+            document.getElementById('profile-username-tag').innerText = `@${currentUser.username}`;
+            document.getElementById('profile-role-badge').innerText = currentUser.role;
+
+            document.getElementById('profile-detail-name').innerText = currentUser.fullname;
+            document.getElementById('profile-detail-email').innerText = currentUser.email;
+            document.getElementById('profile-detail-username').innerText = currentUser.username;
+            document.getElementById('profile-detail-role').innerText = currentUser.role;
+        }
+
+        function handleResetPassword(e) {
+            e.preventDefault();
+            const oldPass = document.getElementById('reset-old-pass').value;
+            const newPass = document.getElementById('reset-new-pass').value;
+
+            if (currentUser.password !== oldPass) {
+                showToast('Kata sandi lama Anda salah!', 'error');
+                return;
+            }
+
+            currentUser.password = newPass;
+            const idx = users.findIndex(u => u.username === currentUser.username);
+            if (idx !== -1) users[idx].password = newPass;
+
+            saveData();
+            showToast('Kata sandi berhasil diperbarui!', 'success');
+            document.getElementById('reset-old-pass').value = '';
+            document.getElementById('reset-new-pass').value = '';
+        }
+
+        // --- ADMIN DASHBOARD & CRUD MODULE ---
+        function renderAdminTable() {
+            const table = document.getElementById('admin-food-table');
+            
+            document.getElementById('stat-total-food').innerText = foods.length;
+            document.getElementById('stat-free-food').innerText = foods.filter(f => f.price === 0).length;
+            document.getElementById('stat-total-orders').innerText = orders.length;
+
+            table.innerHTML = foods.map(item => `
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-4 px-4 flex items-center gap-3 font-bold text-slate-800">
+                        <img src="${item.image}" alt="${item.name}" class="w-10 h-10 rounded-xl object-cover bg-slate-100 flex-shrink-0" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80'">
+                        <span class="line-clamp-1">${item.name}</span>
+                    </td>
+                    <td class="py-4 px-4">
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold">${item.category}</span>
+                    </td>
+                    <td class="py-4 px-4 font-bold text-xs text-slate-700">
+                        ${item.stock} porsi
+                    </td>
+                    <td class="py-4 px-4 font-black text-xs">
+                        ${item.price === 0 ? '<span class="text-brand-600">GRATIS</span>' : `Rp ${item.price.toLocaleString('id-ID')}`}
+                    </td>
+                    <td class="py-4 px-4">
+                        <span class="font-mono text-xs font-black text-amber-600 countdown-food-badge" data-expiry="${item.expiryTime}">Calculating...</span>
+                    </td>
+                    <td class="py-4 px-4">
+                        ${item.hidden 
+                            ? '<span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 text-[11px] font-bold"><i class="fa-solid fa-eye-slash mr-1"></i> Tersembunyi</span>' 
+                            : '<span class="px-2.5 py-1 rounded-full bg-brand-100 text-brand-700 text-[11px] font-bold"><i class="fa-solid fa-eye mr-1"></i> Tampil</span>'}
+                    </td>
+                    <td class="py-4 px-4 text-right space-x-1">
+                        <button onclick="toggleHideFood('${item.id}')" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all" title="${item.hidden ? 'Tampilkan' : 'Sembunyikan'}">
+                            <i class="fa-solid ${item.hidden ? 'fa-eye text-brand-600' : 'fa-eye-slash'}"></i>
+                        </button>
+                        <button onclick="editFood('${item.id}')" class="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition-all" title="Edit">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="deleteFood('${item.id}')" class="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-all" title="Hapus">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            updateLiveTimers();
+        }
+
+        function openAdminModal(foodData = null) {
+            const modal = document.getElementById('admin-food-modal');
+            const title = document.getElementById('modal-title');
+            const form = document.getElementById('form-admin-food');
+
+            form.reset();
+            if (foodData) {
+                title.innerText = "Edit Data Makanan";
+                document.getElementById('food-id').value = foodData.id;
+                document.getElementById('food-name').value = foodData.name;
+                document.getElementById('food-category').value = foodData.category;
+                document.getElementById('food-stock').value = foodData.stock || 5;
+                document.getElementById('food-price').value = foodData.price;
+                const remainingHours = Math.max(1, Math.round((foodData.expiryTime - Date.now()) / (3600 * 1000)));
+                document.getElementById('food-duration-hours').value = remainingHours;
+                document.getElementById('food-image').value = foodData.image;
+            } else {
+                title.innerText = "Tambah Makanan Baru";
+                document.getElementById('food-id').value = '';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-food-modal').classList.add('hidden');
+        }
+
+        function handleSaveFood(e) {
+            e.preventDefault();
+            const id = document.getElementById('food-id').value;
+            const name = document.getElementById('food-name').value.trim();
+            const category = document.getElementById('food-category').value;
+            const stock = parseInt(document.getElementById('food-stock').value) || 1;
+            const price = parseInt(document.getElementById('food-price').value) || 0;
+            const durationHours = parseInt(document.getElementById('food-duration-hours').value) || 24;
+            const image = document.getElementById('food-image').value.trim();
+
+            const expiryTime = Date.now() + (durationHours * 3600 * 1000);
+
+            if (id) {
+                const idx = foods.findIndex(f => f.id === id);
+                if (idx !== -1) {
+                    foods[idx].name = name;
+                    foods[idx].category = category;
+                    foods[idx].stock = stock;
+                    foods[idx].price = price;
+                    foods[idx].expiryTime = expiryTime;
+                    foods[idx].image = image;
+                }
+                showToast('Data makanan berhasil diperbarui!', 'success');
+            } else {
+                const newFood = {
+                    id: 'food-' + Date.now(),
+                    name,
+                    category,
+                    stock,
+                    price,
+                    image,
+                    expiryTime,
+                    hidden: false
+                };
+                foods.unshift(newFood);
+                showToast('Makanan baru berhasil ditambahkan!', 'success');
+            }
+
+            saveData();
+            closeAdminModal();
+            renderAdminTable();
+        }
+
+        function editFood(id) {
+            const food = foods.find(f => f.id === id);
+            if (food) openAdminModal(food);
+        }
+
+        function toggleHideFood(id) {
+            const food = foods.find(f => f.id === id);
+            if (food) {
+                food.hidden = !food.hidden;
+                saveData();
+                showToast(`Makanan berhasil ${food.hidden ? 'disembunyikan' : 'ditampilkan'}`, 'info');
+                renderAdminTable();
+            }
+        }
+
+        function deleteFood(id) {
+            foods = foods.filter(f => f.id !== id);
+            saveData();
+            showToast('Makanan telah dihapus dari inventaris.', 'info');
+            renderAdminTable();
+        }
+
+        // --- UTILITY TOAST NOTIFICATIONS ---
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bgClass = "bg-slate-900 text-white";
+            let icon = "fa-circle-info";
+
+            if (type === 'success') {
+                bgClass = "bg-brand-600 text-white shadow-brand-600/30";
+                icon = "fa-circle-check";
+            } else if (type === 'error') {
+                bgClass = "bg-rose-600 text-white shadow-rose-600/30";
+                icon = "fa-circle-xmark";
+            }
+
+            toast.className = `px-4 py-3.5 rounded-2xl shadow-xl font-bold text-xs flex items-center gap-2.5 transition-all duration-300 transform translate-y-3 opacity-0 pointer-events-auto ${bgClass}`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i> <span>${message}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-3', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-3');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
